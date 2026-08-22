@@ -22,6 +22,17 @@ const PITCH_RANGE = 0.55;
 const FOLLOW = 4;
 /** Seconds one quarter-turn takes. */
 const TWIST_DURATION = 0.42;
+/** Sits back at this size, and grows to full size under the pointer. */
+const REST_SCALE = 0.82;
+const HOVER_SCALE = 1;
+/** Higher snaps to the hover size more sharply. */
+const SCALE_FOLLOW = 7;
+/** Edge of the invisible box that decides whether the cube is hovered. */
+const HOVER_BOX = 2.06;
+/** Most of the shorter viewport axis the cube is allowed to span. */
+const SCREEN_FRACTION = 0.85;
+/** Widest silhouette the cube presents while it turns (its face diagonal). */
+const CUBE_SPAN = 2.74;
 
 const HALF_PI = Math.PI / 2;
 const AXES = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)];
@@ -57,6 +68,15 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+/**
+ * Keeps the cube inside a narrow viewport. Full size once there is room for
+ * it, so wide screens are unaffected and a portrait phone shrinks it to fit.
+ */
+function fitToViewport(viewport: { width: number; height: number }): number {
+  const shorter = Math.min(viewport.width, viewport.height);
+  return Math.min(1, (shorter * SCREEN_FRACTION) / CUBE_SPAN);
+}
+
 function dominantAxis(vector: Vector3): number {
   const x = Math.abs(vector.x);
   const y = Math.abs(vector.y);
@@ -76,6 +96,8 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
   const group = useRef<Group>(null);
   const pieces = useRef<(Group | null)[]>([]);
   const twist = useRef<Twist | null>(null);
+  const hovered = useRef(false);
+  const sized = useRef(false);
   const pointer = useMousePosition();
 
   const states = useMemo<CubeletState[]>(
@@ -137,6 +159,18 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
     cube.rotation.y += (targetYaw - cube.rotation.y) * step;
     cube.rotation.x += (targetPitch - cube.rotation.x) * step;
 
+    // Grow to full size under the pointer, shrink back when it leaves, and
+    // stay within the viewport either way. The first frame snaps rather than
+    // eases, so a small screen never shows the cube at desktop size.
+    const targetScale =
+      (hovered.current ? HOVER_SCALE : REST_SCALE) *
+      fitToViewport(state.viewport);
+    const scaleStep = sized.current ? 1 - Math.exp(-SCALE_FOLLOW * delta) : 1;
+    sized.current = true;
+    cube.scale.setScalar(
+      cube.scale.x + (targetScale - cube.scale.x) * scaleStep,
+    );
+
     const active = twist.current;
     let angle = 0;
     if (active) {
@@ -180,7 +214,22 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
   });
 
   return (
-    <group ref={group} rotation={[BASE_PITCH, BASE_YAW, 0]}>
+    <group ref={group} rotation={[BASE_PITCH, BASE_YAW, 0]} scale={REST_SCALE}>
+      {/* One box owns hover, so moving between cubelets cannot flicker it.
+          Transparent rather than `visible={false}` so it still gets raycast,
+          and it takes no click handler so twists pass straight through. */}
+      <mesh
+        onPointerOver={() => {
+          hovered.current = true;
+        }}
+        onPointerOut={() => {
+          hovered.current = false;
+        }}
+      >
+        <boxGeometry args={[HOVER_BOX, HOVER_BOX, HOVER_BOX]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+
       {CUBELET_SPECS.map((spec, index) => (
         <Cubelet
           key={spec.id}
