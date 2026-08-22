@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio
 
-## Getting Started
+Personal portfolio built with Next.js (App Router), TypeScript, Tailwind CSS v4
+and Three.js via React Three Fiber. Package manager: **pnpm**.
 
-First, run the development server:
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script           | Purpose                             |
+| ---------------- | ----------------------------------- |
+| `pnpm dev`       | Dev server (Turbopack)              |
+| `pnpm build`     | Production build                    |
+| `pnpm start`     | Serve the production build          |
+| `pnpm lint`      | ESLint                              |
+| `pnpm typecheck` | `tsc --noEmit`                      |
+| `pnpm format`    | Prettier (with Tailwind class sort) |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` before wiring up the contact endpoint.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Folder structure
 
-## Learn More
+```
+src/
+  app/                  # routes only — a folder per URL segment
+    layout.tsx          # root shell: fonts, metadata, header/footer
+    page.tsx            # /
+    about/page.tsx      # /about
+    work/page.tsx       # /work
+    work/[slug]/page.tsx# /work/:slug  (SSG via generateStaticParams)
+    contact/page.tsx    # /contact
+    not-found.tsx       # 404
+    api/contact/route.ts# POST /api/contact
+  components/
+    layout/             # header, footer, container — page chrome
+    sections/           # composed page blocks (hero, project grid, …)
+    ui/                 # small reusable primitives (button, …)
+    three/              # everything WebGL
+      scene-canvas.tsx  # the only place a <Canvas> is created
+      scenes/           # full scenes, one per surface
+      objects/          # individual meshes / groups
+      shaders/          # .glsl / shader material files
+  config/site.ts        # name, nav, social links — edit this first
+  data/                 # static content (projects.ts)
+  hooks/                # client-side hooks
+  lib/                  # pure helpers (cn, metadata, project queries)
+  styles/globals.css    # Tailwind entry + design tokens (@theme)
+  types/                # shared TypeScript types
+public/
+  images/  models/  textures/    # static assets (.glb/.gltf go in models/)
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Conventions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Server components by default.** Add `"use client"` only where you need
+  state, effects or WebGL.
+- **Three.js is client-only and lazily loaded.** Server components import
+  `LazyHeroScene` (`next/dynamic`, `ssr: false`) so three.js stays out of the
+  initial bundle. New scenes should follow the same pattern.
+- **Design tokens live in `@theme`** in `globals.css` — use
+  `bg-background`, `text-muted`, `text-accent` rather than raw hex values.
+- **Files are kebab-case**, components are PascalCase named exports.
+- **Import via `@/`** (mapped to `src/`), never `../../..`.
+- Respect `prefers-reduced-motion`; `useReducedMotion()` is wired into the
+  hero scene already.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Adding a project
 
-## Deploy on Vercel
+1. Add an entry to `src/data/projects.ts` (set `featured: true` to surface it
+   on the homepage).
+2. Drop a cover image in `public/images/` and reference it as `/images/foo.jpg`.
+3. `/work/<slug>` is generated automatically.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Adding a 3D scene
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Add meshes under `src/components/three/objects/`.
+2. Compose them in `src/components/three/scenes/my-scene.tsx` (a client
+   component) wrapped in `<SceneCanvas>`.
+3. Export a `next/dynamic` wrapper with `ssr: false` and import that from the
+   page.
