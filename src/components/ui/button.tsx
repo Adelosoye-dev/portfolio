@@ -3,11 +3,13 @@ import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";
 
 const base =
-  "inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-medium lg:h-12 lg:px-7 lg:text-base transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 lg:h-12 lg:px-7 lg:text-base";
 
 const variants = {
-  primary: "bg-foreground text-background hover:bg-foreground/85",
-  ghost: "border border-white/15 text-foreground hover:bg-white/5",
+  /** `live` is the go colour everywhere on the site. */
+  primary: "bg-live text-background hover:bg-live/85",
+  ghost:
+    "border-muted/30 text-foreground hover:border-live/40 hover:bg-live/5 border",
 } as const;
 
 type Variant = keyof typeof variants;

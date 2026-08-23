@@ -10,12 +10,12 @@ export function HeroScene() {
 
   return (
     <SceneCanvas>
-      <ambientLight intensity={0.75} />
+      <ambientLight intensity={0.85} />
       <directionalLight position={[4, 6, 4]} intensity={1.8} />
       <directionalLight
         position={[-6, -2, -4]}
         intensity={0.7}
-        color="#7c9dff"
+        color="#5b9dff"
       />
       <RubiksCube idleMotion={reducedMotion ? 0 : 1} />
     </SceneCanvas>

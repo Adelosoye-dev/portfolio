@@ -6,7 +6,7 @@ export function StackStrip() {
   return (
     <section
       aria-label="Tools I work with"
-      className="border-t border-white/5 py-10 lg:py-12"
+      className="border-muted/10 border-t py-10 lg:py-12"
     >
       <Container>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
@@ -34,7 +34,7 @@ export function StackStrip() {
                   <span
                     aria-hidden
                     style={{ color: tool.color }}
-                    className="grid size-7 place-items-center rounded-md border border-white/15 font-mono text-xs lg:size-8 lg:text-sm"
+                    className="border-muted/30 grid size-7 place-items-center rounded-md border font-mono text-xs lg:size-8 lg:text-sm"
                   >
                     {tool.label.charAt(0)}
                   </span>

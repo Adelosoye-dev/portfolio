@@ -59,7 +59,7 @@ export default async function ProjectPage({
         className="mt-12 aspect-[16/10]"
       />
 
-      <dl className="mt-12 grid gap-6 border-t border-white/8 pt-8 sm:grid-cols-2">
+      <dl className="border-muted/10 mt-12 grid gap-6 border-t pt-8 sm:grid-cols-2">
         <div>
           <dt className="text-muted text-xs tracking-[0.2em] uppercase lg:text-sm">
             Stack

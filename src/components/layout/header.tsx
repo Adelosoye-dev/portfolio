@@ -4,7 +4,7 @@ import { siteConfig } from "@/config/site";
 
 export function Header() {
   return (
-    <header className="bg-background/70 sticky top-0 z-50 border-b border-white/5 backdrop-blur-md">
+    <header className="bg-background/80 border-muted/10 sticky top-0 z-50 border-b backdrop-blur-md">
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link
           href="/"

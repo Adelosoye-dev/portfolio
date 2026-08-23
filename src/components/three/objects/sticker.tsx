@@ -100,8 +100,14 @@ function MarkSticker({
     const context = canvas.getContext("2d");
     if (!context) return null;
 
-    context.fillStyle = "#111114";
+    // Tile: the surface colour washed with the mark own hue, so the cube
+    // reads as colour at a glance and the glyph still has contrast.
+    context.fillStyle = "#171d27";
     context.fillRect(0, 0, resolution, resolution);
+    context.globalAlpha = 0.34;
+    context.fillStyle = color;
+    context.fillRect(0, 0, resolution, resolution);
+    context.globalAlpha = 1;
 
     // The marks are authored for a 24×24 viewBox.
     const inset = resolution * 0.2;

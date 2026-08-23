@@ -1,13 +1,30 @@
 @import "tailwindcss";
 
+/**
+ * Palette taken from the kind of interface this portfolio is about: an ink
+ * ground, one raised surface, and status hues that keep their meaning —
+ * blue for structure and links, green for shipped, amber for in progress.
+ */
 @theme {
-  --color-background: #08080a;
-  --color-foreground: #f4f4f5;
-  --color-muted: #9b9ba4;
-  --color-accent: #7c9dff;
+  --color-background: #0a0c10;
+  --color-surface: #12161d;
+  --color-foreground: #e8edf5;
+  --color-muted: #7c8798;
+  --color-accent: #5b9dff;
+  --color-live: #2fd4a0;
+  --color-active: #f5a524;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-ui), ui-monospace, monospace;
+}
+
+/** The faint measure behind the hero — a console grid, not decoration. */
+@utility grid-lines {
+  background-image:
+    linear-gradient(to right, rgb(232 237 245 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(232 237 245 / 0.05) 1px, transparent 1px);
+  background-size: 72px 72px;
 }
 
 @layer base {
@@ -22,9 +39,20 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
   ::selection {
     background-color: var(--color-accent);
     color: var(--color-background);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
   }
 }
 

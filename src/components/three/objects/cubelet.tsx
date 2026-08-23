@@ -31,7 +31,7 @@ export function Cubelet({ spec, ref }: CubeletProps) {
         radius={0.07}
         smoothness={3}
       >
-        <meshStandardMaterial color="#101013" roughness={0.5} metalness={0.1} />
+        <meshStandardMaterial color="#101620" roughness={0.5} metalness={0.1} />
       </RoundedBox>
 
       {spec.stickers.map((sticker) => (
