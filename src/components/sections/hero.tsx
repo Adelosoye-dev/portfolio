@@ -6,32 +6,31 @@ import { siteConfig } from "@/config/site";
 export function Hero() {
   return (
     <section className="relative isolate overflow-hidden">
-      {/* Interactive, so no `pointer-events-none` here: the cube can be
-          clicked wherever the copy above it doesn't cover it. */}
+      {/* Takes no pointer events: the cube hit-tests the pointer itself, so it
+          stays reachable through the copy without the copy giving up its own
+          clicks or text selection. */}
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 cursor-pointer opacity-70"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-70"
       >
         <LazyHeroScene />
       </div>
 
       {/* Fills the space under the sticky 4rem header, so the backdrop
-          scene is centred on what the visitor actually sees. The wrapper
-          passes clicks through to the cube; the copy itself still takes
-          them, so text stays selectable and the links stay clickable. */}
-      <Container className="pointer-events-none flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center py-24 text-center">
-        <p className="text-muted pointer-events-auto text-sm tracking-[0.2em] uppercase">
+          scene is centred on what the visitor actually sees. */}
+      <Container className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center py-24 text-center">
+        <p className="text-muted text-sm tracking-[0.2em] uppercase lg:text-base">
           {siteConfig.role}
         </p>
-        <h1 className="pointer-events-auto mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-6xl">
+        <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight sm:text-6xl lg:max-w-4xl lg:text-7xl">
           I build interactive things for the web.
         </h1>
-        <p className="text-muted pointer-events-auto mt-6 max-w-xl text-lg">
+        <p className="text-muted mt-6 max-w-xl text-lg lg:max-w-2xl lg:text-xl">
           {siteConfig.description}
         </p>
-        <div className="pointer-events-auto mt-10 flex flex-wrap justify-center gap-3">
-          <ButtonLink href="/work">View work</ButtonLink>
-          <ButtonLink href="/contact" variant="ghost">
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <ButtonLink href="/#projects">View work</ButtonLink>
+          <ButtonLink href="/#contact" variant="ghost">
             Get in touch
           </ButtonLink>
         </div>

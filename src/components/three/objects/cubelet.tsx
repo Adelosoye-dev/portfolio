@@ -1,7 +1,6 @@
 "use client";
 
 import { RoundedBox } from "@react-three/drei";
-import type { ThreeEvent } from "@react-three/fiber";
 import type { Ref } from "react";
 import type { Group } from "three";
 import {
@@ -14,7 +13,6 @@ import { Sticker } from "@/components/three/objects/sticker";
 
 type CubeletProps = {
   spec: CubeletSpec;
-  onSelect: (event: ThreeEvent<MouseEvent>) => void;
   ref?: Ref<Group>;
 };
 
@@ -23,15 +21,11 @@ type CubeletProps = {
  * looks right; after that `RubiksCube` drives position and rotation directly
  * so twists can move a layer without re-rendering React.
  */
-export function Cubelet({ spec, onSelect, ref }: CubeletProps) {
+export function Cubelet({ spec, ref }: CubeletProps) {
   const [x, y, z] = spec.coords;
 
   return (
-    <group
-      ref={ref}
-      position={[x * PITCH, y * PITCH, z * PITCH]}
-      onClick={onSelect}
-    >
+    <group ref={ref} position={[x * PITCH, y * PITCH, z * PITCH]}>
       <RoundedBox
         args={[CUBELET, CUBELET, CUBELET]}
         radius={0.07}

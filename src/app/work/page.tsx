@@ -1,6 +1,5 @@
-import { Container } from "@/components/layout/container";
-import { ProjectGrid } from "@/components/sections/project-grid";
-import { SectionHeading } from "@/components/sections/section-heading";
+import { Section } from "@/components/layout/section";
+import { ProjectList } from "@/components/sections/project-list";
 import { createMetadata } from "@/lib/metadata";
 import { getAllProjects } from "@/lib/projects";
 
@@ -12,9 +11,8 @@ export const metadata = createMetadata({
 
 export default function WorkPage() {
   return (
-    <Container className="py-24">
-      <SectionHeading eyebrow="Archive" title="All work" />
-      <ProjectGrid projects={getAllProjects()} />
-    </Container>
+    <Section id="projects" index="01" title="Projects" className="border-t-0">
+      <ProjectList projects={getAllProjects()} />
+    </Section>
   );
 }

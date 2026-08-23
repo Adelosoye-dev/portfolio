@@ -2,17 +2,32 @@
 
 import { useEffect, useRef } from "react";
 
+export type PointerSnapshot = {
+  /** Viewport coordinates, as the pointer events report them. */
+  clientX: number;
+  clientY: number;
+  /** False until the pointer has moved, so consumers can stay neutral. */
+  moved: boolean;
+};
+
 /**
- * Pointer position normalized to [-1, 1] on both axes.
- * Stored in a ref so 3D render loops can read it without re-rendering React.
+ * Latest pointer position, stored in a ref so 3D render loops can read it
+ * without re-rendering React. Kept in viewport coordinates: normalize it
+ * against whatever element you are hit-testing, since the window is rarely
+ * the frame you actually care about.
  */
 export function useMousePosition() {
-  const position = useRef({ x: 0, y: 0 });
+  const position = useRef<PointerSnapshot>({
+    clientX: 0,
+    clientY: 0,
+    moved: false,
+  });
 
   useEffect(() => {
     const onMove = (event: PointerEvent) => {
-      position.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-      position.current.y = -((event.clientY / window.innerHeight) * 2 - 1);
+      position.current.clientX = event.clientX;
+      position.current.clientY = event.clientY;
+      position.current.moved = true;
     };
 
     window.addEventListener("pointermove", onMove);

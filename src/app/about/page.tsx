@@ -1,5 +1,6 @@
-import { Container } from "@/components/layout/container";
-import { SectionHeading } from "@/components/sections/section-heading";
+import { Section } from "@/components/layout/section";
+import { About } from "@/components/sections/about";
+import { Experience } from "@/components/sections/experience";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
@@ -7,17 +8,16 @@ export const metadata = createMetadata({
   path: "/about",
 });
 
+/** The same sections the home page shows, on their own page for direct links. */
 export default function AboutPage() {
   return (
-    <Container className="py-24">
-      <SectionHeading eyebrow="About" title="A little background" />
-      <div className="text-muted max-w-2xl space-y-6 text-lg">
-        <p>
-          Replace this with your story — what you build, how you think about
-          craft, and the kind of work you want more of.
-        </p>
-        <p>Keep it short. Two or three paragraphs is plenty here.</p>
-      </div>
-    </Container>
+    <>
+      <Section id="about" index="02" title="About me" className="border-t-0">
+        <About />
+      </Section>
+      <Section id="experience" index="03" title="Experience">
+        <Experience />
+      </Section>
+    </>
   );
 }

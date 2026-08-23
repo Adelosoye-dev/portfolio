@@ -1,6 +1,5 @@
-import { Container } from "@/components/layout/container";
-import { SectionHeading } from "@/components/sections/section-heading";
-import { siteConfig } from "@/config/site";
+import { Section } from "@/components/layout/section";
+import { Contact } from "@/components/sections/contact";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata({
@@ -10,17 +9,8 @@ export const metadata = createMetadata({
 
 export default function ContactPage() {
   return (
-    <Container className="py-24">
-      <SectionHeading eyebrow="Contact" title="Say hello" />
-      <p className="text-muted max-w-xl text-lg">
-        The fastest way to reach me is email.
-      </p>
-      <a
-        href={`mailto:${siteConfig.email}`}
-        className="mt-6 inline-block text-xl underline underline-offset-4"
-      >
-        {siteConfig.email}
-      </a>
-    </Container>
+    <Section id="contact" index="04" title="Contact" className="border-t-0">
+      <Contact />
+    </Section>
   );
 }

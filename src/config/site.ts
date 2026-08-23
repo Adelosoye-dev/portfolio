@@ -3,21 +3,26 @@
  * Update this instead of hard-coding strings across components.
  */
 export const siteConfig = {
-  name: "Your Name",
-  role: "Creative Developer",
+  name: "Olajumoke Adelosoye",
+  /** Shown where the full name will not fit, e.g. the mobile header. */
+  monogram: "OA",
+  role: "Frontend Engineer",
   description:
-    "Portfolio of Your Name — a creative developer building interactive experiences for the web.",
+    "Frontend engineer with 3+ years building production web applications in React, Next.js and TypeScript — AI platforms, admin systems and financial workflows.",
+  // TODO: point this at the real domain before deploying; it is only used to
+  // build canonical and Open Graph URLs.
   url: "https://yourdomain.com",
-  email: "hello@yourdomain.com",
-  links: {
-    github: "https://github.com/yourhandle",
-    linkedin: "https://linkedin.com/in/yourhandle",
-    x: "https://x.com/yourhandle",
-  },
+  email: "Adelosoyeolajumoke9@gmail.com",
+  location: "Nigeria (GMT+1)",
+  /** Served from /public. */
+  resume: "/olajumoke-adelosoye-resume.pdf",
+  /** Add LinkedIn or X here and they appear in the footer automatically. */
+  social: [{ label: "GitHub", href: "https://github.com/Adelosoye-dev" }],
   nav: [
-    { label: "Work", href: "/work" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { label: "Projects", href: "/#projects" },
+    { label: "About", href: "/#about" },
+    { label: "Experience", href: "/#experience" },
+    { label: "Contact", href: "/#contact" },
   ],
 } as const;
 

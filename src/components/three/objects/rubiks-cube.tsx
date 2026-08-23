@@ -1,8 +1,18 @@
 "use client";
 
-import { type ThreeEvent, useFrame } from "@react-three/fiber";
-import { useCallback, useMemo, useRef } from "react";
-import { type Group, Quaternion, Vector3 } from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  type Group,
+  type Intersection,
+  MathUtils,
+  type Mesh,
+  type Object3D,
+  Quaternion,
+  Raycaster,
+  Vector2,
+  Vector3,
+} from "three";
 import { CUBELET_SPECS, PITCH } from "@/components/three/objects/cube-layout";
 import { Cubelet } from "@/components/three/objects/cubelet";
 import { useMousePosition } from "@/hooks/use-mouse-position";
@@ -33,6 +43,8 @@ const HOVER_BOX = 2.06;
 const SCREEN_FRACTION = 0.85;
 /** Widest silhouette the cube presents while it turns (its face diagonal). */
 const CUBE_SPAN = 2.74;
+/** Elements that own their clicks — never twist the cube instead. */
+const INTERACTIVE = "a, button, input, textarea, select, label, [role=button]";
 
 const HALF_PI = Math.PI / 2;
 const AXES = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)];
@@ -62,6 +74,7 @@ const spin = new Quaternion();
 const facing = new Vector3();
 const world = new Quaternion();
 const inverseWorld = new Quaternion();
+const screen = new Vector2();
 
 /** Smooth start and finish, so a twist reads as a hand turning it. */
 function easeInOut(t: number): number {
@@ -77,6 +90,19 @@ function fitToViewport(viewport: { width: number; height: number }): number {
   return Math.min(1, (shorter * SCREEN_FRACTION) / CUBE_SPAN);
 }
 
+/** Viewport coordinates as device coordinates within the canvas. */
+function toScreen(
+  canvas: HTMLCanvasElement,
+  clientX: number,
+  clientY: number,
+): Vector2 {
+  const rect = canvas.getBoundingClientRect();
+  return screen.set(
+    ((clientX - rect.left) / rect.width) * 2 - 1,
+    -(((clientY - rect.top) / rect.height) * 2 - 1),
+  );
+}
+
 function dominantAxis(vector: Vector3): number {
   const x = Math.abs(vector.x);
   const y = Math.abs(vector.y);
@@ -86,19 +112,30 @@ function dominantAxis(vector: Vector3): number {
 }
 
 /**
- * Decorative 3×3 cube. It leans toward the pointer, and clicking a face
- * twists that layer a quarter-turn like someone idly playing with it.
+ * Decorative 3×3 cube. It leans toward the pointer, grows under it, and a
+ * click twists that layer a quarter-turn like someone idly playing with it.
+ *
+ * Hit-testing is done here rather than through r3f's pointer events: the cube
+ * sits behind the hero copy, so DOM events would be swallowed by the text
+ * long before they reached the canvas. Raycasting from the pointer position
+ * ignores what is painted on top, which lets the copy stay selectable and
+ * the cube stay reachable through it.
  *
  * Each sticker is an image slot: give it a path in `@/data/cube-stickers`
  * and the flat colour is replaced by that image.
  */
 export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
   const group = useRef<Group>(null);
+  const hitArea = useRef<Mesh>(null);
   const pieces = useRef<(Group | null)[]>([]);
   const twist = useRef<Twist | null>(null);
   const hovered = useRef(false);
   const sized = useRef(false);
   const pointer = useMousePosition();
+
+  const gl = useThree((state) => state.gl);
+  const camera = useThree((state) => state.camera);
+  const raycaster = useMemo(() => new Raycaster(), []);
 
   const states = useMemo<CubeletState[]>(
     () =>
@@ -110,15 +147,24 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
   );
 
   const startTwist = useCallback(
-    (index: number, event: ThreeEvent<MouseEvent>) => {
-      event.stopPropagation();
+    (hit: Intersection) => {
       const cube = group.current;
       if (!cube || twist.current) return;
 
-      // Which way the clicked face points, expressed in the cube's own space.
+      // Which piece was hit — the ray lands on one of its stickers or body.
+      let node: Object3D | null = hit.object;
+      let index = -1;
+      while (node && index < 0) {
+        index = pieces.current.indexOf(node as Group);
+        node = node.parent;
+      }
+      if (index < 0) return;
+
+      // Which way the clicked face points, expressed in the cube's own space
+      // so the outer lean cannot skew which layer gets picked.
       facing
-        .copy(event.face?.normal ?? OUTWARD)
-        .applyQuaternion(event.object.getWorldQuaternion(world))
+        .copy(hit.face?.normal ?? OUTWARD)
+        .applyQuaternion(hit.object.getWorldQuaternion(world))
         .applyQuaternion(
           inverseWorld.copy(cube.getWorldQuaternion(world)).invert(),
         );
@@ -139,6 +185,33 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
     [states],
   );
 
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (twist.current) return;
+
+      // Real controls keep their clicks, and a click that ends a text
+      // selection is the visitor selecting text, not reaching for the cube.
+      const target = event.target as Element | null;
+      if (target?.closest(INTERACTIVE)) return;
+      if (window.getSelection()?.toString()) return;
+
+      const targets = pieces.current.filter(
+        (piece): piece is Group => piece !== null,
+      );
+      if (!targets.length) return;
+
+      const point = toScreen(gl.domElement, event.clientX, event.clientY);
+      if (Math.abs(point.x) > 1 || Math.abs(point.y) > 1) return;
+
+      raycaster.setFromCamera(point, camera);
+      const [hit] = raycaster.intersectObjects(targets, true);
+      if (hit) startTwist(hit);
+    };
+
+    window.addEventListener("click", onClick);
+    return () => window.removeEventListener("click", onClick);
+  }, [camera, gl, raycaster, startTwist]);
+
   useFrame((state, delta) => {
     const cube = group.current;
     if (!cube) return;
@@ -146,13 +219,32 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
     const time = state.clock.elapsedTime;
     const sway = idleMotion * 0.1;
 
+    let leanX = 0;
+    let leanY = 0;
+
+    if (pointer.current.moved) {
+      const point = toScreen(
+        state.gl.domElement,
+        pointer.current.clientX,
+        pointer.current.clientY,
+      );
+      // Clamped, so a pointer far outside the canvas does not over-rotate.
+      leanX = MathUtils.clamp(point.x, -1, 1);
+      leanY = MathUtils.clamp(point.y, -1, 1);
+
+      raycaster.setFromCamera(point, state.camera);
+      hovered.current =
+        hitArea.current !== null &&
+        raycaster.intersectObject(hitArea.current, false).length > 0;
+    } else {
+      hovered.current = false;
+    }
+
     // Pointer up/right turns that side of the cube toward the cursor.
     const targetYaw =
-      BASE_YAW + pointer.current.x * YAW_RANGE + Math.sin(time * 0.3) * sway;
+      BASE_YAW + leanX * YAW_RANGE + Math.sin(time * 0.3) * sway;
     const targetPitch =
-      BASE_PITCH -
-      pointer.current.y * PITCH_RANGE +
-      Math.sin(time * 0.23) * sway;
+      BASE_PITCH - leanY * PITCH_RANGE + Math.sin(time * 0.23) * sway;
 
     // Frame-rate independent damping toward the target.
     const step = 1 - Math.exp(-FOLLOW * delta);
@@ -215,19 +307,11 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
 
   return (
     <group ref={group} rotation={[BASE_PITCH, BASE_YAW, 0]} scale={REST_SCALE}>
-      {/* One box owns hover, so moving between cubelets cannot flicker it.
-          Transparent rather than `visible={false}` so it still gets raycast,
-          and it takes no click handler so twists pass straight through. */}
-      <mesh
-        onPointerOver={() => {
-          hovered.current = true;
-        }}
-        onPointerOut={() => {
-          hovered.current = false;
-        }}
-      >
+      {/* Hover target. Never drawn, but still raycast, since the hit-testing
+          above is ours rather than the renderer's. One box rather than the 27
+          pieces keeps the per-frame test cheap. */}
+      <mesh ref={hitArea} visible={false}>
         <boxGeometry args={[HOVER_BOX, HOVER_BOX, HOVER_BOX]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
       {CUBELET_SPECS.map((spec, index) => (
@@ -237,7 +321,6 @@ export function RubiksCube({ idleMotion = 1 }: RubiksCubeProps) {
           ref={(piece) => {
             pieces.current[index] = piece;
           }}
-          onSelect={(event) => startTwist(index, event)}
         />
       ))}
     </group>
