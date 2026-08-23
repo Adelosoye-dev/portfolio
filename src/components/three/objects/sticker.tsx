@@ -1,16 +1,17 @@
 "use client";
 
 import { useTexture } from "@react-three/drei";
-import { Shape, ShapeGeometry, SRGBColorSpace } from "three";
+import { useEffect, useMemo, type ReactNode } from "react";
+import { CanvasTexture, Shape, ShapeGeometry, SRGBColorSpace } from "three";
+import type { StickerContent } from "@/data/cube-stickers";
 
-type StickerProps = {
+type Placement = {
   position: [number, number, number];
   rotation: [number, number, number];
   size: number;
-  /** Shown when `image` is null — the placeholder. */
-  color: string;
-  image: string | null;
 };
+
+type StickerProps = Placement & { content: StickerContent };
 
 const geometries = new Map<string, ShapeGeometry>();
 
@@ -49,44 +50,108 @@ function stickerGeometry(size: number): ShapeGeometry {
   return geometry;
 }
 
-/** Split out so the texture hook only ever runs for stickers that have one. */
-function ImageSticker({
+function StickerMesh({
   position,
   rotation,
   size,
-  image,
-}: StickerProps & { image: string }) {
-  const texture = useTexture(image, (loaded) => {
+  children,
+}: Placement & { children: ReactNode }) {
+  return (
+    <mesh
+      position={position}
+      rotation={rotation}
+      geometry={stickerGeometry(size)}
+    >
+      {children}
+    </mesh>
+  );
+}
+
+/** Split out so the texture hook only runs for stickers that have one. */
+function ImageSticker({ src, ...placement }: Placement & { src: string }) {
+  const texture = useTexture(src, (loaded) => {
     const one = Array.isArray(loaded) ? loaded[0] : loaded;
     one.colorSpace = SRGBColorSpace;
   });
 
   return (
-    <mesh
-      position={position}
-      rotation={rotation}
-      geometry={stickerGeometry(size)}
-    >
+    <StickerMesh {...placement}>
       <meshStandardMaterial map={texture} roughness={0.35} metalness={0} />
-    </mesh>
+    </StickerMesh>
   );
 }
 
 /**
- * One cube sticker. Renders `image` when given a path, otherwise the flat
- * face colour that stands in for it.
+ * Paints a brand mark onto a tile with Canvas2D. The path data already lives
+ * in the bundle, so this needs no logo files and no extra requests, and it
+ * stays sharp because it is rasterised at texture resolution.
  */
-export function Sticker(props: StickerProps) {
-  if (props.image) return <ImageSticker {...props} image={props.image} />;
+function MarkSticker({
+  path,
+  color,
+  ...placement
+}: Placement & { path: string; color: string }) {
+  const texture = useMemo(() => {
+    const resolution = 256;
+    const canvas = document.createElement("canvas");
+    canvas.width = resolution;
+    canvas.height = resolution;
 
-  const { position, rotation, size, color } = props;
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+
+    context.fillStyle = "#111114";
+    context.fillRect(0, 0, resolution, resolution);
+
+    // The marks are authored for a 24×24 viewBox.
+    const inset = resolution * 0.2;
+    const scale = (resolution - inset * 2) / 24;
+    context.translate(inset, inset);
+    context.scale(scale, scale);
+    context.fillStyle = color;
+    context.fill(new Path2D(path));
+
+    const created = new CanvasTexture(canvas);
+    created.colorSpace = SRGBColorSpace;
+    return created;
+  }, [path, color]);
+
+  useEffect(() => () => texture?.dispose(), [texture]);
+
   return (
-    <mesh
-      position={position}
-      rotation={rotation}
-      geometry={stickerGeometry(size)}
-    >
-      <meshStandardMaterial color={color} roughness={0.35} metalness={0} />
-    </mesh>
+    <StickerMesh {...placement}>
+      <meshStandardMaterial
+        map={texture}
+        color={texture ? undefined : color}
+        roughness={0.35}
+        metalness={0}
+      />
+    </StickerMesh>
   );
+}
+
+function ColorSticker({ color, ...placement }: Placement & { color: string }) {
+  return (
+    <StickerMesh {...placement}>
+      <meshStandardMaterial color={color} roughness={0.35} metalness={0} />
+    </StickerMesh>
+  );
+}
+
+/**
+ * One cube sticker: a project screenshot, a tool's brand mark, or the flat
+ * face colour when there is nothing to show.
+ */
+export function Sticker({ content, ...placement }: StickerProps) {
+  if (content.kind === "image") {
+    return <ImageSticker src={content.src} {...placement} />;
+  }
+
+  if (content.kind === "mark") {
+    return (
+      <MarkSticker path={content.path} color={content.color} {...placement} />
+    );
+  }
+
+  return <ColorSticker color={content.color} {...placement} />;
 }

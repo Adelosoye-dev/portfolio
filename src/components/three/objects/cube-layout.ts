@@ -1,4 +1,4 @@
-import { cubeStickers } from "@/data/cube-stickers";
+import { cubeStickers, type StickerContent } from "@/data/cube-stickers";
 import type { CubeFace } from "@/types";
 
 /** Edge length of one cubelet. */
@@ -83,8 +83,7 @@ export type StickerSpec = {
   /** Position within the cubelet, so twists carry the sticker along. */
   position: [number, number, number];
   rotation: [number, number, number];
-  color: string;
-  image: string | null;
+  content: StickerContent;
 };
 
 export type CubeletSpec = {
@@ -114,8 +113,11 @@ function buildCubelets(): CubeletSpec[] {
             key: spec.face,
             position: spec.offset(lift),
             rotation: spec.rotation,
-            color: FACE_COLORS[spec.face],
-            image: cubeStickers[spec.face][spec.slot(x, y, z)],
+            // The flat face colour is the fallback when a slot is empty.
+            content: cubeStickers[spec.face][spec.slot(x, y, z)] ?? {
+              kind: "color",
+              color: FACE_COLORS[spec.face],
+            },
           });
         }
 

@@ -40,8 +40,7 @@ export function Cubelet({ spec, ref }: CubeletProps) {
           position={sticker.position}
           rotation={sticker.rotation}
           size={STICKER}
-          color={sticker.color}
-          image={sticker.image}
+          content={sticker.content}
         />
       ))}
     </group>

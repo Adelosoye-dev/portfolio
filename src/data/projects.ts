@@ -92,15 +92,4 @@ export const projects: Project[] = [
     cover: "/images/milan-imperial.png",
     liveUrl: "https://www.milanimperial.com/",
   },
-  {
-    slug: "drello",
-    title: "Drello",
-    summary:
-      "A blog and job platform for developers and creators, with Web3 monetization built in.",
-    description:
-      "Supervised a team of frontend developers while building the core product myself — keeping milestones on schedule and coding standards consistent — and worked with backend and product to integrate APIs into complete workflows.",
-    period: "Nov 2024 — 2025",
-    role: "Assistant Frontend Lead",
-    stack: ["Next.js", "TypeScript", "Tailwind CSS", "Web3"],
-  },
 ];
