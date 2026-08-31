@@ -40,8 +40,9 @@ export function Hero() {
         <p className="text-accent font-mono text-xs tracking-[0.25em] uppercase lg:text-sm">
           {siteConfig.role}
         </p>
-        <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-tight sm:text-6xl lg:max-w-4xl lg:text-7xl">
-          I build interfaces that hold a lot of state.
+        <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-tight sm:text-6xl lg:max-w-4xl lg:text-6xl">
+          {/* I build interfaces that hold a lot of state. */}
+          Have a product with complex state and a deadline? That is the work I like most.
         </h1>
         <p className="text-muted mt-6 max-w-xl text-lg lg:max-w-2xl lg:text-xl">
           {siteConfig.description}

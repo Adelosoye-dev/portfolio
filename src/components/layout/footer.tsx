@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="border-muted/10 border-t py-10">
       <Container className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium tracking-tight">
+          <p className="text-sm font-medium tracking-tight lg:text-[20px] text-muted">
             {siteConfig.name}
           </p>
           <p className="text-muted mt-1 text-sm">
@@ -20,7 +20,7 @@ export function Footer() {
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className="text-muted hover:text-foreground text-sm transition-colors"
+                className="text-muted hover:text-foreground text-sm transition-colors lg:text-[20px]"
               >
                 {item.label}
               </a>
@@ -29,7 +29,7 @@ export function Footer() {
           <li>
             <a
               href={`mailto:${siteConfig.email}`}
-              className="text-muted hover:text-foreground text-sm transition-colors"
+              className="text-muted hover:text-foreground text-sm transition-colors lg:text-[20px]"
             >
               Email
             </a>

@@ -6,8 +6,7 @@ export function Contact() {
     <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
       <div>
         <p className="max-w-xl text-xl font-medium tracking-tight sm:text-2xl lg:max-w-2xl lg:text-3xl">
-          Have a product with complex state and a deadline? That is the work I
-          like most.
+          complex state? Strange edge cases?  Tight deadline? Perfect.
         </p>
 
         <dl className="mt-10 grid gap-6 sm:grid-cols-2">

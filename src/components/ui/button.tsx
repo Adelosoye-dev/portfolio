@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils";
 
 const base =
-  "inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 lg:h-12 lg:px-7 lg:text-base";
+  "inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 lg:h-12 lg:px-7 lg:text-[20px]";
 
 const variants = {
   /** `live` is the go colour everywhere on the site. */

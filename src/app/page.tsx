@@ -15,7 +15,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <StackStrip />
+      {/* <StackStrip /> */}
 
       <Section id="projects" index="01" title="Projects">
         <ProjectList projects={featured} />

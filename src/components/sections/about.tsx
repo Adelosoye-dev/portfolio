@@ -1,17 +1,18 @@
 import { about } from "@/data/about";
 import { siteConfig } from "@/config/site";
 import { ButtonAnchor } from "@/components/ui/button";
-import { MediaFrame } from "@/components/ui/media-frame";
+// import { MediaFrame } from "@/components/ui/media-frame";
 
 export function About() {
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-16">
-      <MediaFrame
+    // <div className="grid gap-10 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-16">
+    <div>
+      {/* <MediaFrame
         src={about.portrait}
         alt={siteConfig.name}
         label="Portrait"
         className="aspect-[4/5]"
-      />
+      /> */}
 
       <div>
         <p className="max-w-2xl text-xl font-medium tracking-tight sm:text-2xl lg:text-3xl">
