@@ -44,3 +44,5 @@ next-env.d.ts
 # editor
 .idea
 .vscode
+CLAUDE.md
+AGENTS.md
